@@ -7,3 +7,5 @@ Utiliza a função "convertToMp4" para converter os vídeos para o formato mp4 e
 A função "processNextVideo" é chamada sempre que um vídeo é concluído ou há um erro na conversão. Ela verifica se há algum vídeo na fila e se não há nenhum processo de conversão atualmente, e se ambas as condições forem atendidas, inicia a conversão do próximo vídeo na fila.
 A função "addVideoToQueue" é usada para adicionar um vídeo à fila de conversão. Ela recebe como parâmetros o arquivo de entrada, o arquivo de saída e o nome da imagem a ser criada.
 No final do código, é chamado a função "addVideoToQueue" com os argumentos "file_example_MOV_480_700kB.mov", "videoConverted.mp4" e "thumbs" para adicionar um vídeo à fila e iniciar a conversão.
+
+crie uma pasta para armazenar os videos para converter chamada "videos_for_convert", depois crie uma pasta chamada "converted" onde os videos convertidos serão armazenados e uma pasta chamada "thumbs" onde sera armazenada apos a conversão do video uma imagen do video.
