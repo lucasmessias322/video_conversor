@@ -1,11 +1,16 @@
-# Documentação
+# Conversor de Vídeo
+Este é um script para converter vídeos em formato MOV para MP4 e gerar uma imagem em formato PNG da parte principal do vídeo. O script foi escrito em JavaScript utilizando as bibliotecas ffmpeg e path.
 
-Este código é uma implementação de uma fila de conversão de vídeo que usa a biblioteca "fluent-ffmpeg" e "path" do Node.js. Ele tem as seguintes funcionalidades:
+Funcionamento
+O script mantém uma fila de vídeos a serem convertidos e, a cada conversão concluída, processa o próximo da fila. É possível adicionar vídeos à fila chamando a função addVideoToQueue(), passando como argumentos o caminho do arquivo de entrada, o caminho do arquivo de saída e o nome do arquivo de imagem.
 
-Armazena vídeos a serem convertidos em um array chamado "videoQueue".
-Utiliza a função "convertToMp4" para converter os vídeos para o formato mp4 e criar uma imagem .png da parte principal do vídeo. Essa função usa a biblioteca "fluent-ffmpeg" para fazer a conversão e as opções de saída especificadas garantem compatibilidade e melhor performance ao reproduzir o vídeo.
-A função "processNextVideo" é chamada sempre que um vídeo é concluído ou há um erro na conversão. Ela verifica se há algum vídeo na fila e se não há nenhum processo de conversão atualmente, e se ambas as condições forem atendidas, inicia a conversão do próximo vídeo na fila.
-A função "addVideoToQueue" é usada para adicionar um vídeo à fila de conversão. Ela recebe como parâmetros o arquivo de entrada, o arquivo de saída e o nome da imagem a ser criada.
-No final do código, é chamado a função "addVideoToQueue" com os argumentos "file_example_MOV_480_700kB.mov", "videoConverted.mp4" e "thumbs" para adicionar um vídeo à fila e iniciar a conversão.
-
-crie uma pasta para armazenar os videos para converter chamada "videos_for_convert", depois crie uma pasta chamada "converted" onde os videos convertidos serão armazenados e uma pasta chamada "thumbs" onde sera armazenada apos a conversão do video uma imagen do video.
+Dependências
+fluent-ffmpeg
+path
+Como usar
+Instale as dependências com o comando npm install fluent-ffmpeg path
+Adicione vídeos à fila chamando a função addVideoToQueue()
+Execute o script com o comando node script.js
+Observações
+É necessário ter o ffmpeg instalado na máquina para que o script funcione corretamente.
+O script supõe que as pastas "videos_for_convert", "thumbs" e "converted" já existem e estão localizadas na pasta principal do projeto.
