@@ -2,13 +2,15 @@ const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
-const mapDirectory = require("./mapDirectory");
+
 const unlinkAsync = promisify(fs.unlink);
 const readdirAsync = promisify(fs.readdir);
 const statAsync = promisify(fs.stat);
+const mapDirectory = require("./mapDirectory");
+mapDirectory();
 
 // importar a lista de videos para conversão
-const videosForConvertData = require("../databases/videosForConvert.json");
+const videosForConvertData = require("../temp/videosForConvert.json");
 
 // converte a lista para um array de objetos
 const videoList = [...videosForConvertData];

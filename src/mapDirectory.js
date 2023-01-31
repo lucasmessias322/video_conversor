@@ -2,6 +2,9 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports = async function mapDirectory() {
+  console.log(
+    `Mapando pasta videos_for_convert e gerando arquivo videosForConvert.json `
+  );
   const dirpath = path.resolve(__dirname, "..", "videos_for_convert");
 
   const files = fs.readdirSync(dirpath);
@@ -13,7 +16,7 @@ module.exports = async function mapDirectory() {
     imageFile: `${file.split(".")[0]}`,
   }));
   fs.writeFileSync(
-    path.resolve(__dirname, "..", "databases", "videosForConvert.json"),
+    path.resolve(__dirname, "..", "temp", "videosForConvert.json"),
     JSON.stringify(fileObjs)
   );
 };
