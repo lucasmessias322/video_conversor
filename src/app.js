@@ -7,12 +7,13 @@ const unlinkAsync = promisify(fs.unlink);
 const readdirAsync = promisify(fs.readdir);
 const statAsync = promisify(fs.stat);
 
-mapDirectory();
-
+// importar a lista de videos para conversão
 const videosForConvertData = require("../databases/videosForConvert.json");
 
+// converte a lista para um array de objetos
 const videoList = [...videosForConvertData];
 
+// função para formatar o tempo
 function msConversion(millis) {
   const sec = Math.floor(millis / 1000);
   const hrs = Math.floor(sec / 3600);
@@ -26,12 +27,16 @@ function msConversion(millis) {
   return `${hourStr}${minuteStr}${secondStr}`;
 }
 
+// função para converter os videos
 async function convertVideos() {
+  // marcar o tempo de início
   const startTime = Date.now();
 
+  // loop para converter cada vídeo da lista
   for (const video of videoList) {
     console.log(`---Converting video: ${video.inputFile}`);
 
+    // promessa para garantir que o vídeo será convertido antes de passar para o próximo
     await new Promise((resolve) => {
       ffmpeg(
         path.resolve(__dirname, "..", "videos_for_convert", video.inputFile)
@@ -43,6 +48,7 @@ async function convertVideos() {
         .outputOptions("-threads", "2")
         .outputOptions("-crf", "22")
         .outputOptions("-preset", "fast")
+        // evento para mostrar quando a conversão terminar
         .on("end", () => {
           console.log(`Finished converting video: ${video.inputFile}`);
           resolve();
@@ -54,9 +60,10 @@ async function convertVideos() {
   console.log("=========> [ All videos converted! ] <=========");
   console.log("============================================");
 
+  // loop para gerar imagem de cada vídeo convertido
   for (const video of videoList) {
     console.log(`---Generating image for video: ${video.inputFile}`);
-
+    // promessa para garantir que a imagem será gerada antes de passar
     await new Promise((resolve) => {
       ffmpeg(path.resolve(__dirname, "..", "converted", video.outputFile))
         .on("end", () => {
@@ -67,8 +74,8 @@ async function convertVideos() {
         })
         .screenshots({
           count: 1,
-          folder: path.resolve(__dirname, "..", "thumbs"),
-          filename: video.imageFile,
+
+          filename: path.resolve(__dirname, "..", "thumbs", video.imageFile),
           size: "1280x720",
         });
     });
