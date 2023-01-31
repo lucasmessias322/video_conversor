@@ -7,13 +7,27 @@ mapDirectory();
 
 const videosForConvertData = require("../databases/videosForConvert.json");
 
+function msConversion(millis) {
+  const sec = Math.floor(millis / 1000);
+  const hrs = Math.floor(sec / 3600);
+  const min = Math.floor((sec - hrs * 3600) / 60);
+  const seconds = sec % 60;
+
+  const hourStr = hrs > 0 ? `${hrs}:` : "";
+  const minuteStr = `${String(min).padStart(2, "0")}:`;
+  const secondStr = `${String(seconds).padStart(2, "0")}`;
+
+  return `${hourStr}${minuteStr}${secondStr}`;
+}
+
 const videoQueue = [...videosForConvertData];
 let currentProcessing = false;
 let maxParallelProcess = os.cpus().length;
 let timeTaken;
+let totalTime = 0;
 
 const convertToMp4 = (inputFile, outputFile, imageFile) => {
-  console.log(`Started converting video: ${path.basename(inputFile)}`);
+  console.log(`Convertendo video: ${path.basename(inputFile)}`);
   const startTime = Date.now();
   ffmpeg(path.resolve(__dirname, "..", "videos_for_convert", inputFile))
     .outputOptions("-c:v", "libx264")
@@ -29,20 +43,22 @@ const convertToMp4 = (inputFile, outputFile, imageFile) => {
       size: "1280x720",
     })
     .on("filenames", (filenames) => {
-      console.log(`Generating screenshot for ${path.basename(inputFile)}`);
+      console.log(`Gerando imagen para ${path.basename(inputFile)}`);
     })
     .save(path.resolve(__dirname, "..", "converted", outputFile))
     .on("end", () => {
       timeTaken = Date.now() - startTime;
-      console.log(`
-Conversion completed: ${path.basename(inputFile)} in ${timeTaken}ms
+      totalTime += timeTaken;
+      console.log(`Conversão de video completa: ${path.basename(
+        inputFile
+      )} in ${msConversion(timeTaken)}
 `);
       processQueue();
     })
     .on("error", (err) => {
-      console.error(`
-Error converting file ${path.basename(inputFile)}: ${err.message}
-`);
+      console.error(
+        `Error converting file ${path.basename(inputFile)}: ${err.message}`
+      );
       processQueue();
     });
 };
@@ -58,17 +74,24 @@ const processQueue = () => {
         nextVideo.outputFile,
         nextVideo.imageFile
       );
+      console.log("------------------------------------------------");
       console.log(
-        `Estimated time remaining: ${
-          (videoQueue.length * timeTaken) / 1000
-        } seconds`
+        `------[ Tempo estimado restante: ${msConversion(
+          videoQueue.length * timeTaken
+        )} ]`
       );
+      console.log("------------------------------------------------");
     }
   }
 };
 
-videoQueue.forEach((video, index) => {
-  if (index < maxParallelProcess) {
-    convertToMp4(video.inputFile, video.outputFile, video.imageFile);
+for (let i = 0; i < maxParallelProcess; i++) {
+  if (videoQueue.length > 0) {
+    const nextVideo = videoQueue.shift();
+    convertToMp4(
+      nextVideo.inputFile,
+      nextVideo.outputFile,
+      nextVideo.imageFile
+    );
   }
-});
+}
