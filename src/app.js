@@ -1,11 +1,17 @@
 const ffmpeg = require("fluent-ffmpeg");
+const fs = require("fs");
 const path = require("path");
-const os = require("os");
+const { promisify } = require("util");
 const mapDirectory = require("./mapDirectory");
+const unlinkAsync = promisify(fs.unlink);
+const readdirAsync = promisify(fs.readdir);
+const statAsync = promisify(fs.stat);
 
 mapDirectory();
 
 const videosForConvertData = require("../databases/videosForConvert.json");
+
+const videoList = [...videosForConvertData];
 
 function msConversion(millis) {
   const sec = Math.floor(millis / 1000);
@@ -20,78 +26,59 @@ function msConversion(millis) {
   return `${hourStr}${minuteStr}${secondStr}`;
 }
 
-const videoQueue = [...videosForConvertData];
-let currentProcessing = false;
-let maxParallelProcess = os.cpus().length;
-let timeTaken;
-let totalTime = 0;
-
-const convertToMp4 = (inputFile, outputFile, imageFile) => {
-  console.log(`Convertendo video: ${path.basename(inputFile)}`);
+async function convertVideos() {
   const startTime = Date.now();
-  ffmpeg(path.resolve(__dirname, "..", "videos_for_convert", inputFile))
-    .outputOptions("-c:v", "libx264")
-    .outputOptions("-c:a", "aac")
-    .outputOptions("-strict", "-2")
-    .outputOptions("-movflags", "faststart")
-    .outputOptions("-threads", maxParallelProcess)
-    .outputOptions("-crf", "22")
-    .outputOptions("-preset", "fast")
-    .screenshots({
-      count: 1,
-      filename: path.resolve(__dirname, "..", "thumbs", imageFile),
-      size: "1280x720",
-    })
-    .on("filenames", (filenames) => {
-      console.log(`Gerando imagen para ${path.basename(inputFile)}`);
-    })
-    .save(path.resolve(__dirname, "..", "converted", outputFile))
-    .on("end", () => {
-      timeTaken = Date.now() - startTime;
-      totalTime += timeTaken;
-      console.log(`Conversão de video completa: ${path.basename(
-        inputFile
-      )} in ${msConversion(timeTaken)}
-`);
-      processQueue();
-    })
-    .on("error", (err) => {
-      console.error(
-        `Error converting file ${path.basename(inputFile)}: ${err.message}`
-      );
-      processQueue();
+
+  for (const video of videoList) {
+    console.log(`---Converting video: ${video.inputFile}`);
+
+    await new Promise((resolve) => {
+      ffmpeg(
+        path.resolve(__dirname, "..", "videos_for_convert", video.inputFile)
+      )
+        .outputOptions("-c:v", "libx264")
+        .outputOptions("-c:a", "aac")
+        .outputOptions("-strict", "-2")
+        .outputOptions("-movflags", "faststart")
+        .outputOptions("-threads", "2")
+        .outputOptions("-crf", "22")
+        .outputOptions("-preset", "fast")
+        .on("end", () => {
+          console.log(`Finished converting video: ${video.inputFile}`);
+          resolve();
+        })
+        .save(path.resolve(__dirname, "..", "converted", video.outputFile));
     });
-};
-
-const processQueue = () => {
-  currentProcessing = false;
-  if (videoQueue.length > 0) {
-    if (!currentProcessing) {
-      currentProcessing = true;
-      const nextVideo = videoQueue.shift();
-      convertToMp4(
-        nextVideo.inputFile,
-        nextVideo.outputFile,
-        nextVideo.imageFile
-      );
-      console.log("------------------------------------------------");
-      console.log(
-        `------[ Tempo estimado restante: ${msConversion(
-          videoQueue.length * timeTaken
-        )} ]`
-      );
-      console.log("------------------------------------------------");
-    }
   }
-};
 
-for (let i = 0; i < maxParallelProcess; i++) {
-  if (videoQueue.length > 0) {
-    const nextVideo = videoQueue.shift();
-    convertToMp4(
-      nextVideo.inputFile,
-      nextVideo.outputFile,
-      nextVideo.imageFile
-    );
+  console.log("=========> [ All videos converted! ] <=========");
+  console.log("============================================");
+
+  for (const video of videoList) {
+    console.log(`---Generating image for video: ${video.inputFile}`);
+
+    await new Promise((resolve) => {
+      ffmpeg(path.resolve(__dirname, "..", "converted", video.outputFile))
+        .on("end", () => {
+          console.log(
+            `Finished generating image for video: ${video.outputFile}`
+          );
+          resolve();
+        })
+        .screenshots({
+          count: 1,
+          folder: path.resolve(__dirname, "..", "thumbs"),
+          filename: video.imageFile,
+          size: "1280x720",
+        });
+    });
   }
+
+  console.log("All images generated!");
+
+  const endTime = Date.now();
+  console.log("------------------------------------------------");
+  console.log(`------[ Elapsed time: ${msConversion(endTime - startTime)} ]`);
 }
+
+convertVideos();
