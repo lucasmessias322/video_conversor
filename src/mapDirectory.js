@@ -15,6 +15,12 @@ module.exports = async function mapDirectory() {
     outputFile: `${file.split(".")[0]}_converted.mp4`,
     imageFile: `${file.split(".")[0]}`,
   }));
+
+  // Criar pasta "temp" se não existir
+  if (!fs.existsSync(path.resolve(__dirname, "..", "temp"))) {
+    fs.mkdirSync(path.resolve(__dirname, "..", "temp"));
+  }
+
   fs.writeFileSync(
     path.resolve(__dirname, "..", "temp", "videosForConvert.json"),
     JSON.stringify(fileObjs)

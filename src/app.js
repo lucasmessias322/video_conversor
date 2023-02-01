@@ -7,6 +7,8 @@ const unlinkAsync = promisify(fs.unlink);
 const readdirAsync = promisify(fs.readdir);
 const statAsync = promisify(fs.stat);
 const mapDirectory = require("./mapDirectory");
+
+//mapeia o diretorio
 mapDirectory();
 
 // importar a lista de videos para conversão
