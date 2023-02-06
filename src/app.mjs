@@ -1,38 +1,27 @@
-const ffmpeg = require("fluent-ffmpeg");
-const fs = require("fs");
-const path = require("path");
-const { promisify } = require("util");
+import ffmpeg from "fluent-ffmpeg";
+import fs from "fs";
+import path from "path";
+import { promisify } from "util";
+import mapDirectory from "./msConversion.mjs";
+import msConversion from "./msConversion.mjs";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const unlinkAsync = promisify(fs.unlink);
 const readdirAsync = promisify(fs.readdir);
 const statAsync = promisify(fs.stat);
-const mapDirectory = require("./mapDirectory");
 
 //mapeia o diretorio
 mapDirectory();
 
 // importar a lista de videos para conversão
-const videosForConvertData = require("../temp/videosForConvert.json");
-
-// converte a lista para um array de objetos
-const videoList = [...videosForConvertData];
-
-// função para formatar o tempo
-function msConversion(millis) {
-  const sec = Math.floor(millis / 1000);
-  const hrs = Math.floor(sec / 3600);
-  const min = Math.floor((sec - hrs * 3600) / 60);
-  const seconds = sec % 60;
-
-  const hourStr = hrs > 0 ? `${hrs}:` : "";
-  const minuteStr = `${String(min).padStart(2, "0")}:`;
-  const secondStr = `${String(seconds).padStart(2, "0")}`;
-
-  return `${hourStr}${minuteStr}${secondStr}`;
-}
+import videosForConvertData from "../temp/videosForConvert.json" assert { type: "json" };
 
 // função para converter os videos
 async function convertVideos() {
+  const videoList = [...videosForConvertData];
   // marcar o tempo de início
   const startTime = Date.now();
 

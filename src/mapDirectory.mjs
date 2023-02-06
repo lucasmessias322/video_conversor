@@ -1,7 +1,7 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
-module.exports = async function mapDirectory() {
+export default async function mapDirectory() {
   console.log(
     `Mapando pasta videos_for_convert e gerando arquivo videosForConvert.json `
   );
@@ -25,4 +25,4 @@ module.exports = async function mapDirectory() {
     path.resolve(__dirname, "..", "temp", "videosForConvert.json"),
     JSON.stringify(fileObjs)
   );
-};
+}

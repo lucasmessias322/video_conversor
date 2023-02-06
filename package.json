@@ -1,13 +1,13 @@
 {
-  "name": "cypt",
+  "name": "video_conversor",
   "version": "1.0.0",
-  "description": "",
+  "description": "conversor de videos para mp4",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/app.js"
+    "start": "node ./src/app.mjs"
   },
   "keywords": [],
-  "author": "",
+  "author": "lucasmessias322",
   "license": "ISC",
   "dependencies": {
     "fluent-ffmpeg": "^2.1.2"
